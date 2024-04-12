@@ -20,13 +20,14 @@ class _TicTacToeBoardState extends State<TicTacToeBoard> {
         child: GridView.builder(
           itemCount: 9,
           gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+              const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3),
           itemBuilder: (context, index) {
             return Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white24),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   'X',
                   style: TextStyle(

@@ -26,6 +26,8 @@ class SocketMethods {
     }
   }
 
+  void tapGrid(int index, String roomId, List<String> displayElements) {}
+
   // LISTENERS
   void createRoomSuccessListner(BuildContext context) {
     _socketClient.on('createRoomSuccess', (room) {

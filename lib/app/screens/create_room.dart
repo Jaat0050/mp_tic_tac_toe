@@ -56,7 +56,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                           onTap: () {
                             Navigator.pop(context);
                           },
-                          child: Icon(
+                          child: const Icon(
                             Icons.arrow_back,
                             color: Colors.white,
                           ),
