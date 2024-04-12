@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mp_tic_tak_toe/app/resources/provider/room_data_provider.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/custom_textfield.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/responsiveness.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 class WaitingLobby extends StatefulWidget {
   const WaitingLobby({super.key});
@@ -13,6 +18,7 @@ class WaitingLobby extends StatefulWidget {
 
 class _WaitingLobbyState extends State<WaitingLobby> {
   late TextEditingController roomIdController;
+  bool isTap = false;
 
   @override
   void initState() {
@@ -27,6 +33,31 @@ class _WaitingLobbyState extends State<WaitingLobby> {
   void dispose() {
     super.dispose();
     roomIdController.dispose();
+  }
+
+  Future<void> _shareImageAndText(String message) async {
+    try {
+      final ByteData imageData = await rootBundle.load('assets/icon.png');
+      final Uint8List bytes = imageData.buffer.asUint8List();
+      final tempDir = await getTemporaryDirectory();
+      final file = await File('${tempDir.path}/image.jpg').create();
+      await file.writeAsBytes(bytes);
+      await Share.shareFiles(
+        [file.path],
+        text: message,
+      ).then(
+        (value) {
+          setState(() {
+            isTap = false;
+          });
+        },
+      );
+    } catch (e) {
+      print('Error sharing image: $e');
+      setState(() {
+        isTap = false;
+      });
+    }
   }
 
   @override
@@ -48,7 +79,7 @@ class _WaitingLobbyState extends State<WaitingLobby> {
                     onTap: () {
                       Navigator.pop(context);
                     },
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_back,
                       color: Colors.white,
                     ),
@@ -65,12 +96,34 @@ class _WaitingLobbyState extends State<WaitingLobby> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Witing for a player to join...'),
-                    SizedBox(height: 20),
-                    CustomerTextfield(
-                      controller: roomIdController,
-                      hintText: '',
-                      isReadOnly: true,
+                    const Text('Witing for a player to join...'),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomerTextfield(
+                            controller: roomIdController,
+                            hintText: '',
+                            isReadOnly: true,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        GestureDetector(
+                          onTap: isTap
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    isTap = true;
+                                  });
+                                  _shareImageAndText(
+                                      'Use this ID to join: ${roomIdController.text}');
+                                },
+                          child: const Icon(
+                            Icons.share,
+                            color: Colors.white,
+                          ),
+                        )
+                      ],
                     ),
                   ],
                 ),

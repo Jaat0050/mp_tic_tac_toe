@@ -14,6 +14,7 @@ class SocketMethods {
       _socketClient.emit('createRoom', {
         'nickname': nickname,
       });
+    
     }
   }
 
@@ -29,7 +30,7 @@ class SocketMethods {
   void tapGrid(int index, String roomId, List<String> displayElements) {}
 
   // LISTENERS
-  void createRoomSuccessListner(BuildContext context) {
+  Future<void> createRoomSuccessListner(BuildContext context) async {
     _socketClient.on('createRoomSuccess', (room) {
       Provider.of<RoomDataProvider>(context, listen: false)
           .updateRoomData(room);
@@ -37,7 +38,7 @@ class SocketMethods {
     });
   }
 
-  void joinRoomSuccessListner(BuildContext context) {
+  Future<void> joinRoomSuccessListner(BuildContext context) async {
     _socketClient.on('joinRoomSuccess', (room) {
       Provider.of<RoomDataProvider>(context, listen: false)
           .updateRoomData(room);
@@ -45,7 +46,7 @@ class SocketMethods {
     });
   }
 
-  void errorOccuredListner() {
+  Future<void> errorOccuredListner() async {
     _socketClient.on('errorOccurred', (data) {
       toastMsg(data.toString());
     });

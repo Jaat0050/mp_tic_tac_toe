@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mp_tic_tak_toe/app/resources/socket_methods.dart';
+import 'package:mp_tic_tak_toe/app/utils/constants.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/custom_button.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/custom_textfield.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/glowing_text.dart';
@@ -17,11 +18,18 @@ class CreateRoomScreen extends StatefulWidget {
 class _CreateRoomScreenState extends State<CreateRoomScreen> {
   final TextEditingController _nameController = TextEditingController();
   final SocketMethods _socketMethods = SocketMethods();
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _socketMethods.createRoomSuccessListner(context);
+    _socketMethods.createRoomSuccessListner(context).then(
+      (value) {
+        setState(() {
+          isLoading = false;
+        });
+      },
+    );
   }
 
   @override
@@ -90,11 +98,28 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                             hintText: 'Enter your nickname',
                           ),
                           SizedBox(height: size.height * 0.05),
-                          CustomButton(
-                            onTap: () =>
-                                _socketMethods.createRoom(_nameController.text),
-                            text: 'Create',
-                          )
+                          isLoading
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white),
+                                )
+                              : CustomButton(
+                                  onTap: () {
+                                    if (_nameController.text.isNotEmpty) {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
+                                      _socketMethods
+                                          .createRoom(_nameController.text);
+                                    } else {
+                                      toastMsg('Enter name');
+                                    }
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                  },
+                                  text: 'Create',
+                                )
                         ],
                       ),
                     ),

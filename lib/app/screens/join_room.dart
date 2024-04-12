@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mp_tic_tak_toe/app/resources/socket_methods.dart';
+import 'package:mp_tic_tak_toe/app/utils/constants.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/custom_button.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/custom_textfield.dart';
 import 'package:mp_tic_tak_toe/app/utils/widgets/glowing_text.dart';
@@ -17,12 +18,25 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _gameIdController = TextEditingController();
   final SocketMethods _socketMethods = SocketMethods();
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _socketMethods.joinRoomSuccessListner(context);
-    _socketMethods.errorOccuredListner();
+    _socketMethods.joinRoomSuccessListner(context).then(
+      (value) {
+        setState(() {
+          isLoading = false;
+        });
+      },
+    );
+    _socketMethods.errorOccuredListner().then(
+      (value) {
+        setState(() {
+          isLoading = false;
+        });
+      },
+    );
     _socketMethods.updatePlayerStateListener(context);
   }
 
@@ -96,13 +110,31 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                             hintText: 'Enter Game ID',
                           ),
                           SizedBox(height: size.height * 0.05),
-                          CustomButton(
-                            onTap: () => _socketMethods.joinRoom(
-                              _nameController.text,
-                              _gameIdController.text,
-                            ),
-                            text: 'Join',
-                          )
+                          isLoading
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white),
+                                )
+                              : CustomButton(
+                                  onTap: () {
+                                    if (_gameIdController.text.isNotEmpty &&
+                                        _nameController.text.isNotEmpty) {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
+                                      _socketMethods.joinRoom(
+                                        _nameController.text,
+                                        _gameIdController.text,
+                                      );
+                                    } else {
+                                      toastMsg('Enter details');
+                                    }
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                  },
+                                  text: 'Join',
+                                )
                         ],
                       ),
                     ),
